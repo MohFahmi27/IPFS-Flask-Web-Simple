@@ -34,12 +34,12 @@
           </a>
         </div>
       
-        <div id="navbarBasicExample" class="navbar-menu">
+        <div id="navbar" class="navbar-menu is-transparent">
             <div class="navbar-start">
                 <a href="/" class="navbar-item">Files</a>
                 <a href="/find" class="navbar-item">Search</a>
                 <a href="/verifier" class="navbar-item">File Verifier</a>
-                <a href="/print-file?" class="navbar-item">Print</a>
+                 <a href="/print-file?" class="navbar-item">Print</a>
                 <div class="navbar-item has-dropdown is-hoverable">
                     <a class="navbar-link">Filter</a>
                     <div class="navbar-dropdown">
@@ -49,7 +49,7 @@
                         <hr class="navbar-divider">
                         <a target="_blank" href="https://wa.me/+6282155534039/?text=there's a problem..." class="navbar-item">Report an issue</a>
                     </div>
-                </div>
+                </div> 
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
@@ -112,7 +112,7 @@
                                     <td>{{file.file_name}}</td>
                                     <td><img src="https://uxwing.com/wp-content/themes/uxwing/download/tools-equipment-construction/thumbtack-icon.svg" width="20" height="20"></td>
                                 {% endif %}
-                                <td>{{file.file_hash}}</td>
+                                <td id="h{{file.id}}">{{file.file_hash}}</td>
                                 <td>{{file.date}}</td>
                                 <td>
                                     <div class="dropdown is-hoverable">
@@ -131,9 +131,10 @@
                                                         <a href="/pin-file?file_hash={{ file.file_hash }}" class="dropdown-item">Pin</a>
                                                     {% endif %}
                                                     {% if file.pin_status == 1 %}
-                                                        <a href="/rm-pin-file?file_hash={{ file.file_hash }}" class="dropdown-item">UnPin</a>
+                                                        <a href="/rm-pin-file?file_hash={{ file.file_hash }}" class="dropdown-item">Unpin</a>
                                                     {% endif %}
                                                     <a href="update/{{file.id}}" class="dropdown-item">Edit</a>
+                                                    <a onclick="copyText('h{{file.id}}'); alrt('{{file.file_name}}')" class="dropdown-item">Share CIDs</a>
                                                     <a target="_blank" href="/direct-print?file_hash={{ file.file_hash }}" class="dropdown-item">Print</a>
                                                     <hr class="navbar-divider">
                                                     <a href="/delete-file?id={{ file.id }}" class="dropdown-item">Delete</a>
@@ -149,8 +150,29 @@
                 </div>
             </div>
         </div>
-
     </div>
-    
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>InterPlanetary File System for Private Document</strong> by <a href="https://linkedin.com/in/kevin-refinaldi">Kevin Refinaldi Berlin</a>.
+            </p>
+        </div>
+    </footer>
 </body>
+<script>
+    function copyText(id) {
+        var hash = document.getElementById(id);
+        navigator.clipboard.writeText("https://ipfs.io/ipfs/" + hash.innerText);
+        // var el = document.createElement("div");
+        // el.setAttribute("style","position:absolute;top:100px;left:50%;background-color:grey;font-color:white;");
+        // el.innerHTML = "_Link for "+name+" copied to clipboard!_";
+        // setTimeout(function(){
+        //     el.parentNode.removeChild(el);
+        //     },3000);
+        //     document.body.appendChild(el);
+    }
+    function alrt(name) {
+     //   alert("Link for " + name + " copied to clipboard!");
+    }
+</script>
 </html>
