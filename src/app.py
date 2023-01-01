@@ -11,13 +11,17 @@ import os
 import webbrowser
 import pdfkit
 
+path = r'C:\IPFS\file'
+if not os.path.exists(path):
+  os.makedirs(path)
 
-UPLOAD_FOLDER = r'static\uploads'
+UPLOAD_FOLDER = path
 
 app = Flask(__name__)
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTFTTTRSUTlfLS1IVEpGM0QiLCJpYXQiOjE2NjI5ODc0Nzd9.mCvSd2o2vw5Gs7grkBLkW75dlgVcJ-aiqMzfVUvG-q4'
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://kevin:123456@localhost/flask_db'
-# app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:OBel71Uv5Q5FPHWZCDgr@containers-us-west-168.railway.app:6316/railway'
+# app.config['SQLALCHEMY_DATABASE_URI']='postgresql://kevin:123456@localhost/flask_db'
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:pymgyhOb8epbm5Bjw0aq@containers-us-west-162.railway.app:6998/railway'
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
@@ -123,21 +127,25 @@ def logout():
 @app.route('/uploader', methods = ['POST'])
 def upload_file():
     f = request.files['file']
-    f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
-    api = ipfsApi.Client('127.0.0.1', 5001)
-    res = api.add(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
-    file_data = UploadFile.query.filter_by(file_hash=res['Hash']).first()
-    # rows = db.session.query(UploadFile).count()
-    if not file_data:
-      if 'user_id' in session:
-        user = UploadFile(session['user_id'], secure_filename(f.filename), date.today(), res['Hash'], 1)
-        db.session.add(user)
-        db.session.commit()
-      return redirect('/')
+    if f.filename.endswith(('.png', '.jpg', '.jpeg', '.pdf')):
+      f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
+      api = ipfsApi.Client('127.0.0.1', 5001)
+      res = api.add(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
+      file_data = UploadFile.query.filter_by(file_hash=res['Hash']).first()
+      # rows = db.session.query(UploadFile).count()
+      if not file_data:
+        if 'user_id' in session:
+          user = UploadFile(session['user_id'], secure_filename(f.filename), date.today(), res['Hash'], 1)
+          db.session.add(user)
+          db.session.commit()
+        return redirect('/')
+      else:
+        hash = res['Hash']
+        flash(f"{hash} sudah ada")
+        return redirect('/')
     else:
-      hash = res['Hash']
-      flash(f"{hash} sudah ada")
-      return redirect('/')
+        flash("ekstensi file harus berbentuk pdf, png, jpg, atau jpeg")
+        return redirect('/')
     
 @app.route('/update/<int:id>', methods = ['POST', 'GET'])
 def update(id):
@@ -284,4 +292,5 @@ def verify_qr():
       return redirect('/verifier')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application = app
+    application.run(debug=True)
